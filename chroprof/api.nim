@@ -11,22 +11,18 @@ proc getMetrics*(): MetricsTotals =
   ## current thread.
   result = profilerInstance.metrics
 
-template enableProfiling*(callback: EventCallback, maxExecThreshold: Duration) =
+template enableProfiling*(callback: EventCallback, threshold: Duration) =
   ## Enables profiling for the the event loop running in the current thread.
   ## The client may optionally supply a callback to be notified of `Future`
   ## events.
-  attachMonitoring(
-      proc(e: Event) {.nimcall, gcsafe, raises: [].} =
-        profilerInstance.processEvent(e)
-        callback(e)
-      ,
-      maxExecThreshold = maxExecThreshold
-  )
+  profilerInstance.maxExecThreshold = threshold
+  proc onProfilerEvent(e: Event) {.nimcall, gcsafe, raises: [].} =
+    profilerInstance.processEvent(e)
+    callback(e)
+  attachMonitoring(onProfilerEvent)
 
-template enableProfiling*(maxExecThreshold: Duration) =
-  attachMonitoring(
-    proc(e: Event) {.nimcall, gcsafe, raises: [].} =
-      profilerInstance.processEvent(e)
-    ,
-    maxExecThreshold = maxExecThreshold
-  )
+template enableProfiling*(threshold: Duration) =
+  profilerInstance.maxExecThreshold = threshold
+  proc onProfilerEvent(e: Event) {.nimcall, gcsafe, raises: [].} =
+    profilerInstance.processEvent(e)
+  attachMonitoring(onProfilerEvent)

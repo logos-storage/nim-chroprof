@@ -70,6 +70,7 @@ type
   MetricsTotals* = Table[FutureType, AggregateMetrics]
 
   ProfilerState* = object
+    maxExecThreshold*: Duration
     callStack: seq[uint]
     partials: Table[uint, PartialMetrics]
     metrics*: MetricsTotals
@@ -142,9 +143,9 @@ proc aggregatePartial(
   self.metrics.withValue(metrics.futureType, aggMetrics):
     let execTime = metrics.partialExecTime - metrics.partialChildrenExecOverlap
 
-    if execTime > threshold:
+    if execTime > self.maxExecThreshold:
       raiseAssert("Execution time of future is too high (" &
-        $metrics.futureType & ")" & $execTime)
+        $metrics.futureType & ") time: " & $execTime & " threshold: " & $self.maxExecThreshold)
 
     aggMetrics.callCount.inc()
     aggMetrics.execTime += execTime

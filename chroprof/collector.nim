@@ -173,7 +173,7 @@ when defined(metrics):
 
   var asyncProfilerInfo* {.global.}: ChronosProfilerInfo
 
-  proc enableProfilerMetrics*(k: int, maxExecThreshold: Duration) =
+  proc enableProfilerMetrics*(k: int, maxExecThreshold: timer.Duration) =
     assert threadId() == moduleInitThread,
       "You cannot call enableProfilerMetrics() from a thread other than" &
         " the one that initialized the metricscolletor module."
@@ -194,5 +194,5 @@ when defined(metrics):
           if e.newState == ExtendedFutureState.Completed:
             asyncProfilerInfo.collect()
       ,
-      maxExecThreshold = maxExecThreshold
+      maxExecThreshold
     )
