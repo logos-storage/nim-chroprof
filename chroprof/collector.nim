@@ -1,4 +1,4 @@
-## Metrics collector which allows exporting Chronos profiling metrics to 
+## Metrics collector which allows exporting Chronos profiling metrics to
 ## Prometheus.
 
 import std/algorithm
@@ -173,7 +173,7 @@ when defined(metrics):
 
   var asyncProfilerInfo* {.global.}: ChronosProfilerInfo
 
-  proc enableProfilerMetrics*(k: int) =
+  proc enableProfilerMetrics*(k: int, maxExecThreshold: Duration) =
     assert threadId() == moduleInitThread,
       "You cannot call enableProfilerMetrics() from a thread other than" &
         " the one that initialized the metricscolletor module."
@@ -193,4 +193,6 @@ when defined(metrics):
         {.cast(gcsafe).}:
           if e.newState == ExtendedFutureState.Completed:
             asyncProfilerInfo.collect()
+      ,
+      maxExecThreshold = maxExecThreshold
     )

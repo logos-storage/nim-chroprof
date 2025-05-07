@@ -142,6 +142,10 @@ proc aggregatePartial(
   self.metrics.withValue(metrics.futureType, aggMetrics):
     let execTime = metrics.partialExecTime - metrics.partialChildrenExecOverlap
 
+    if execTime > threshold:
+      raiseAssert("Execution time of future is too high (" &
+        $metrics.futureType & ")" & $execTime)
+
     aggMetrics.callCount.inc()
     aggMetrics.execTime += execTime
     aggMetrics.execTimeMax = max(aggMetrics.execTimeMax, execTime)
